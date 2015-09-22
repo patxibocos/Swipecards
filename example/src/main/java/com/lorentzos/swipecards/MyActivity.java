@@ -70,6 +70,16 @@ public class MyActivity extends Activity {
             }
 
             @Override
+            public void onTopCardExit(Object dataObject) {
+                makeToast(MyActivity.this, "Top!");
+            }
+
+            @Override
+            public void onBottomCardExit(Object dataObject) {
+                makeToast(MyActivity.this, "Bottom!");
+            }
+
+            @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
                 // Ask for more data here
                 al.add("XML ".concat(String.valueOf(i)));
@@ -113,6 +123,16 @@ public class MyActivity extends Activity {
     @OnClick(R.id.left)
     public void left() {
         flingContainer.getTopCardListener().selectLeft();
+    }
+
+    @OnClick(R.id.top)
+    public void top() {
+        flingContainer.getTopCardListener().selectTop();
+    }
+
+    @OnClick(R.id.bottom)
+    public void bottom() {
+        flingContainer.getTopCardListener().selectBottom();
     }
 
 

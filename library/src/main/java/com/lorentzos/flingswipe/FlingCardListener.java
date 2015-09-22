@@ -54,10 +54,12 @@ public class FlingCardListener implements View.OnTouchListener {
 
 
     private MOVING_AXIS movingAxis = null;
+
     private enum MOVING_AXIS {
         X,
         Y
     }
+
     private float minDistanceToStartMoving = 3f;
     private boolean startedMoving = false;
 
@@ -74,7 +76,7 @@ public class FlingCardListener implements View.OnTouchListener {
         this.objectH = frame.getHeight();
         this.objectW = frame.getWidth();
         this.halfWidth = objectW / 2f;
-        this.halfHeight= objectH / 2f;
+        this.halfHeight = objectH / 2f;
         this.dataObject = itemAtPosition;
         this.parentWidth = ((ViewGroup) frame.getParent()).getWidth();
         this.parentHeight = ((ViewGroup) frame.getParent()).getHeight();
@@ -220,13 +222,13 @@ public class FlingCardListener implements View.OnTouchListener {
             onSelected(false, 100);
             mFlingListener.onScroll(1.0f);
         } else if (movedBeyondTopBorder()) {
-            // TODO Top swipe
-            onSelected(true, 200);
+            // Top swipe
+            onSelected(true, 150);
             mFlingListener.onScroll(-1.0f);
 
         } else if (movedBeyondBottomBorder()) {
-            // TODO Bottom swipe
-            onSelected(false, 200);
+            // Bottom swipe
+            onSelected(false, 150);
             mFlingListener.onScroll(1.0f);
         } else {
             float abslMoveDistance = Math.abs(aPosX - objectX);
@@ -308,12 +310,22 @@ public class FlingCardListener implements View.OnTouchListener {
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        if (isNegative) {
-                            mFlingListener.onCardExited();
-                            mFlingListener.leftExit(dataObject);
+                        if (movingAxis.equals(MOVING_AXIS.X)) {
+                            if (isNegative) {
+                                mFlingListener.onCardExited();
+                                mFlingListener.leftExit(dataObject);
+                            } else {
+                                mFlingListener.onCardExited();
+                                mFlingListener.rightExit(dataObject);
+                            }
                         } else {
-                            mFlingListener.onCardExited();
-                            mFlingListener.rightExit(dataObject);
+                            if (isNegative) {
+                                mFlingListener.onCardExited();
+                                mFlingListener.topExit(dataObject);
+                            } else {
+                                mFlingListener.onCardExited();
+                                mFlingListener.bottomExit(dataObject);
+                            }
                         }
                         isAnimationRunning = false;
                     }
@@ -326,6 +338,7 @@ public class FlingCardListener implements View.OnTouchListener {
      * Starts a default left exit animation.
      */
     public void selectLeft() {
+        this.movingAxis = MOVING_AXIS.X;
         if (!isAnimationRunning)
             onSelected(true, 200);
     }
@@ -334,24 +347,27 @@ public class FlingCardListener implements View.OnTouchListener {
      * Starts a default right exit animation.
      */
     public void selectRight() {
+        this.movingAxis = MOVING_AXIS.X;
         if (!isAnimationRunning)
             onSelected(false, 200);
     }
 
+    /**
+     * Starts a default left exit animation.
+     */
+    public void selectTop() {
+        this.movingAxis = MOVING_AXIS.Y;
+        if (!isAnimationRunning)
+            onSelected(true, 200);
+    }
 
-    private float getExitPoint(int exitXPoint) {
-        float[] x = new float[2];
-        x[0] = objectX;
-        x[1] = aPosX;
-
-        float[] y = new float[2];
-        y[0] = objectY;
-        y[1] = aPosY;
-
-        LinearRegression regression = new LinearRegression(x, y);
-
-        //Your typical y = ax+b linear regression
-        return (float) regression.slope() * exitXPoint + (float) regression.intercept();
+    /**
+     * Starts a default right exit animation.
+     */
+    public void selectBottom() {
+        this.movingAxis = MOVING_AXIS.Y;
+        if (!isAnimationRunning)
+            onSelected(false, 200);
     }
 
     private float getExitRotation(boolean isLeft) {
@@ -399,6 +415,10 @@ public class FlingCardListener implements View.OnTouchListener {
         void leftExit(Object dataObject);
 
         void rightExit(Object dataObject);
+
+        void topExit(Object dataObject);
+
+        void bottomExit(Object dataObject);
 
         void onClick(Object dataObject);
 
