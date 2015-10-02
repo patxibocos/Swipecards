@@ -27,10 +27,10 @@ dependencies {
 
 
 
-signing {
+/*signing {
     required { has("release") && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
-}
+}*/
 
 
 uploadArchives {
@@ -38,42 +38,6 @@ uploadArchives {
 
     repositories.mavenDeployer {
 
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-        repository(url: sonatypeRepo) {
-            authentication(userName: sonatypeUsername, password: sonatypePassword )
-        }
-
-        snapshotRepository(url: snapshotRepo) {
-            authentication(userName: sonatypeUsername, password: sonatypePassword)
-        }
-
-        pom.project {
-            name POM_NAME
-            description POM_DESC
-            packaging 'aar'
-            url POM_URL
-
-            scm {
-                url POM_SCM_URL
-                connection POM_SCM_CONN
-                developerConnection POM_SCM_DEV_CONN
-            }
-
-            licenses {
-                license {
-                    name LICENCE_NAME
-                    url LICENCE_URL
-                    distribution 'repo'
-                }
-            }
-
-            developers {
-                developer {
-                    id POM_DEV
-                    name POM_DEV_NAME
-                }
-            }
-        }
+        repository(url: "~/.m2")
     }
 }
