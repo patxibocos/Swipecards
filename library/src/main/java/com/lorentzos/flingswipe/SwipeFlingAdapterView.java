@@ -5,12 +5,16 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.PointF;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 /**
  * Created by dionysis_lorentzos on 5/8/14
@@ -25,6 +29,10 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
     private int MAX_VISIBLE = 4;
     private int MIN_ADAPTER_STACK = 6;
     private float ROTATION_DEGREES = 15.f;
+    private Drawable LEFT_IMAGE;
+    private Drawable RIGHT_IMAGE;
+    private int WIDTH_MARGIN_INCREMENT;
+    private int HEIGHT_MARGIN_INCREMENT;
 
     private Adapter mAdapter;
     private int LAST_OBJECT_IN_STACK = 0;
@@ -52,6 +60,11 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
         MAX_VISIBLE = a.getInt(R.styleable.SwipeFlingAdapterView_max_visible, MAX_VISIBLE);
         MIN_ADAPTER_STACK = a.getInt(R.styleable.SwipeFlingAdapterView_min_adapter_stack, MIN_ADAPTER_STACK);
         ROTATION_DEGREES = a.getFloat(R.styleable.SwipeFlingAdapterView_rotation_degrees, ROTATION_DEGREES);
+        ROTATION_DEGREES = a.getFloat(R.styleable.SwipeFlingAdapterView_rotation_degrees, ROTATION_DEGREES);
+        LEFT_IMAGE = a.getDrawable(R.styleable.SwipeFlingAdapterView_left_image);
+        RIGHT_IMAGE = a.getDrawable(R.styleable.SwipeFlingAdapterView_right_image);
+        WIDTH_MARGIN_INCREMENT = a.getDimensionPixelSize(R.styleable.SwipeFlingAdapterView_width_margin_increment, 0);
+        HEIGHT_MARGIN_INCREMENT = a.getDimensionPixelSize(R.styleable.SwipeFlingAdapterView_height_margin_increment, 0);
         a.recycle();
     }
 
@@ -124,23 +137,62 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
         if (adapterCount <= MIN_ADAPTER_STACK) mFlingListener.onAdapterAboutToEmpty(adapterCount);
     }
 
-
     private void layoutChildren(int startingIndex, int adapterCount) {
+        i = 0;
         while (startingIndex < Math.min(adapterCount, MAX_VISIBLE)) {
             View newUnderChild = mAdapter.getView(startingIndex, null, this);
             if (newUnderChild.getVisibility() != GONE) {
                 makeAndAddView(newUnderChild);
                 LAST_OBJECT_IN_STACK = startingIndex;
             }
+            i++;
             startingIndex++;
         }
     }
 
+    static int i;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private void makeAndAddView(View child) {
-
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) child.getLayoutParams();
+        lp.rightMargin = i * WIDTH_MARGIN_INCREMENT;
+        lp.leftMargin = i * WIDTH_MARGIN_INCREMENT;
+        lp.topMargin = (3 - i) * HEIGHT_MARGIN_INCREMENT;
+        lp.bottomMargin = i * HEIGHT_MARGIN_INCREMENT;
+        if (i == 0) {
+            View childView = ((ViewGroup) child).getChildAt(0);
+            RelativeLayout.LayoutParams leftImageLayoutParams = new RelativeLayout.LayoutParams(LEFT_IMAGE.getIntrinsicWidth(), LEFT_IMAGE.getIntrinsicHeight());
+            leftImageLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            leftImageLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_START, RelativeLayout.TRUE);
+            leftImageLayoutParams.addRule(RelativeLayout.ALIGN_TOP, childView.getId());
+
+            ImageView leftImage = new ImageView(getContext());
+            leftImage.setAlpha(0f);
+            leftImage.setImageDrawable(LEFT_IMAGE);
+            leftImage.setId(View.generateViewId());
+            ((ViewGroup) child).addView(leftImage, 0, leftImageLayoutParams);
+
+            RelativeLayout.LayoutParams rightImageLayoutParams = new RelativeLayout.LayoutParams(RIGHT_IMAGE.getIntrinsicWidth(), RIGHT_IMAGE.getIntrinsicHeight());
+            rightImageLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+            rightImageLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE);
+            rightImageLayoutParams.addRule(RelativeLayout.ALIGN_TOP, childView.getId());
+
+            ImageView rightImage = new ImageView(getContext());
+            rightImage.setAlpha(0f);
+            rightImage.setImageDrawable(RIGHT_IMAGE);
+            rightImage.setId(View.generateViewId());
+            ((ViewGroup) child).addView(rightImage, 0, rightImageLayoutParams);
+
+            RelativeLayout.LayoutParams childLayoutParams = (RelativeLayout.LayoutParams) childView.getLayoutParams();
+            childLayoutParams.addRule(RelativeLayout.RIGHT_OF, leftImage.getId());
+            childLayoutParams.addRule(RelativeLayout.END_OF, leftImage.getId());
+            childLayoutParams.addRule(RelativeLayout.LEFT_OF, rightImage.getId());
+            childLayoutParams.addRule(RelativeLayout.START_OF, rightImage.getId());
+            childView.setLayoutParams(childLayoutParams);
+
+            lp.leftMargin -= LEFT_IMAGE.getIntrinsicWidth();
+            lp.rightMargin -= RIGHT_IMAGE.getIntrinsicWidth();
+        }
         addViewInLayout(child, 0, lp, true);
 
         final boolean needToMeasure = child.isLayoutRequested();
@@ -232,20 +284,9 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
                     }
 
                     @Override
-                    public void topExit(Object dataObject) {
-                        mFlingListener.onTopCardExit(dataObject);
-                    }
-
-                    @Override
-                    public void bottomExit(Object dataObject) {
-                        mFlingListener.onBottomCardExit(dataObject);
-                    }
-
-                    @Override
                     public void onClick(Object dataObject) {
                         if (mOnItemClickListener != null)
                             mOnItemClickListener.onItemClicked(0, dataObject);
-
                     }
 
                     @Override
@@ -334,10 +375,6 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
         void onLeftCardExit(Object dataObject);
 
         void onRightCardExit(Object dataObject);
-
-        void onTopCardExit(Object dataObject);
-
-        void onBottomCardExit(Object dataObject);
 
         void onAdapterAboutToEmpty(int itemsInAdapter);
 
