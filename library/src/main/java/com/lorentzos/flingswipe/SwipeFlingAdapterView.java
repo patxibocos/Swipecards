@@ -269,8 +269,7 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
 
                     @Override
                     public void onCardExited() {
-                        mActiveCard = null;
-                        mFlingListener.removeFirstObjectInAdapter();
+
                     }
 
                     @Override
@@ -298,6 +297,11 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
                 mActiveCard.setOnTouchListener(flingCardListener);
             }
         }
+    }
+
+    public void removeTopCard() {
+        mActiveCard = null;
+        mFlingListener.removeFirstObjectInAdapter();
     }
 
     public FlingCardListener getTopCardListener() throws NullPointerException {

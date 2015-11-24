@@ -287,10 +287,8 @@ public class FlingCardListener implements View.OnTouchListener {
                     public void onAnimationEnd(Animator animation) {
 
                         if (isNegative) {
-                            mFlingListener.onCardExited();
                             mFlingListener.leftExit(dataObject);
                         } else {
-                            mFlingListener.onCardExited();
                             mFlingListener.rightExit(dataObject);
                         }
                         isAnimationRunning = false;

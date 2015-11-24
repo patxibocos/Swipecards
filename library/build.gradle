@@ -32,12 +32,11 @@ dependencies {
     sign configurations.archives
 }*/
 
-
 uploadArchives {
     configuration = configurations.archives
+    repositories {
+        mavenInstaller {
 
-    repositories.mavenDeployer {
-
-        repository(url: "~/.m2")
+        }
     }
 }
