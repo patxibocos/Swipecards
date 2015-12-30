@@ -38,17 +38,11 @@ public class FlingCardListener implements View.OnTouchListener {
     private float aPosX;
     private float aPosY;
     private float aDownTouchX;
-    private float aDownTouchY;
 
     // The active pointer is the one currently moving our object.
     private int mActivePointerId = INVALID_POINTER_ID;
     private View frame = null;
 
-
-    private final int TOUCH_ABOVE = 0;
-    private final int TOUCH_BELOW = 1;
-    private int touchPosition;
-    private final Object obj = new Object();
     private boolean isAnimationRunning = false;
     private float MAX_COS = (float) Math.cos(Math.toRadians(45));
 
@@ -100,7 +94,6 @@ public class FlingCardListener implements View.OnTouchListener {
                 if (success) {
                     // Remember where we started
                     aDownTouchX = x;
-                    aDownTouchY = y;
                     //to prevent an initial jump of the magnifier, aposX and aPosY must
                     //have the values from the magnifier frame
                     if (aPosX == 0) {
@@ -108,12 +101,6 @@ public class FlingCardListener implements View.OnTouchListener {
                     }
                     if (aPosY == 0) {
                         aPosY = frame.getY();
-                    }
-
-                    if (y < objectH / 2) {
-                        touchPosition = TOUCH_ABOVE;
-                    } else {
-                        touchPosition = TOUCH_BELOW;
                     }
                 }
                 startedMoving = false;
@@ -145,12 +132,10 @@ public class FlingCardListener implements View.OnTouchListener {
                 // Find the index of the active pointer and fetch its position
                 final int pointerIndexMove = event.findPointerIndex(mActivePointerId);
                 final float xMove = event.getX(pointerIndexMove);
-                final float yMove = event.getY(pointerIndexMove);
 
                 //from http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html
                 // Calculate the distance moved
                 final float dx = xMove - aDownTouchX;
-                final float dy = yMove - aDownTouchY;
 
                 if (!startedMoving) {
                     float xMovedFromDown = Math.abs(xMove - aDownTouchX);
@@ -162,11 +147,7 @@ public class FlingCardListener implements View.OnTouchListener {
 
                     // calculate the rotation degrees
                     float distobjectX = aPosX - objectX;
-                    float rotation = BASE_ROTATION_DEGREES * 2.f * distobjectX / parentWidth;
-                    if (touchPosition == TOUCH_BELOW) {
-                        rotation = -rotation;
-                    }
-
+                    float rotation = - BASE_ROTATION_DEGREES * 2.f * distobjectX / parentWidth;
                     //in this area would be code for doing something with the view as the frame moves.
                     frame.setX(aPosX);
                     frame.setY(aPosY);
@@ -219,7 +200,6 @@ public class FlingCardListener implements View.OnTouchListener {
             aPosX = 0;
             aPosY = 0;
             aDownTouchX = 0;
-            aDownTouchY = 0;
             frame.animate()
                     .setDuration(200)
                     .setInterpolator(new OvershootInterpolator(1.5f))
@@ -316,10 +296,7 @@ public class FlingCardListener implements View.OnTouchListener {
 
     private float getExitRotation(boolean isLeft) {
 
-        float rotation = BASE_ROTATION_DEGREES * 2.f * (parentWidth - objectX) / parentWidth;
-        if (touchPosition == TOUCH_BELOW) {
-            rotation = -rotation;
-        }
+        float rotation = - BASE_ROTATION_DEGREES * 2.f * (parentWidth - objectX) / parentWidth;
         if (isLeft) {
             rotation = -rotation;
         }
