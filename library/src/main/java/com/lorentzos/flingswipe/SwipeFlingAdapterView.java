@@ -268,11 +268,6 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
                         ROTATION_DEGREES, new FlingCardListener.FlingListener() {
 
                     @Override
-                    public void onCardExited() {
-
-                    }
-
-                    @Override
                     public void leftExit(Object dataObject) {
                         mFlingListener.onLeftCardExit(dataObject);
                     }

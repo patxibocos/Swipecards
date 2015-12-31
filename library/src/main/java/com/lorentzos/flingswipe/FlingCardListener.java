@@ -328,7 +328,6 @@ public class FlingCardListener implements View.OnTouchListener {
     }
 
     protected interface FlingListener {
-        void onCardExited();
 
         void leftExit(Object dataObject);
 
